@@ -1,0 +1,88 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+//------ Libreria de Microsoft Office Excel -----------//
+using nmExcel = Microsoft.Office.Interop.Excel;
+
+namespace Loginunison
+{
+    public partial class Usuario : Form
+    {
+        //--------- Crear Tabla ----------//
+        DataTable tus = new DataTable();
+        
+        public Usuario()
+        {
+            InitializeComponent();
+        }
+
+        private void Usuario_Load(object sender, EventArgs e)
+        //--------- Crear Columnas del DataGridView -------//
+        {
+            tus.Columns.Add("Codigo", typeof(string));
+            tus.Columns.Add("Nombre", typeof(string));
+            tus.Columns.Add("Telefono", typeof(string));
+            tus.Columns.Add("Horas Trabajadas", typeof(string));
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        
+        //--------- Agregar los Datos y Renglones al DataGridView------//
+        {
+            DataRow rus = tus.NewRow();
+            rus[0] = txtcu.Text;
+            rus[1] = txtnu.Text;
+            rus[2] = txttu.Text;
+            rus[3] = txtht.Text;
+            tus.Rows.Add(rus);
+            gvusu.DataSource = tus;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+             //------------ Convertir DataGridView a Excel -----------//
+            {
+                nmExcel.Application ExcelApp = new nmExcel.Application();
+                ExcelApp.Application.Workbooks.Add(Type.Missing);
+                ExcelApp.Columns.ColumnWidth = 12;
+                for (int i = 0; i < gvusu.Rows.Count; i++)
+                {
+                    DataGridViewRow Fila = gvusu.Rows[i];
+                    for (int j = 0; j < Fila.Cells.Count; j++)
+                    {
+                        ExcelApp.Cells[i + 1, j + 1] = Fila.Cells[j].Value;
+                    }
+                }
+                // ---------- cuadro de dialogo para Guardar ----------//
+                SaveFileDialog CuadroDialogo = new SaveFileDialog();
+                CuadroDialogo.DefaultExt = ".xlsx";
+                CuadroDialogo.Filter = ".xlsx file(*.xlsx)|*.xlsx";
+                CuadroDialogo.AddExtension = true;
+                CuadroDialogo.RestoreDirectory = true;
+                CuadroDialogo.Title = "Guardar";
+                CuadroDialogo.InitialDirectory = @"Desktop";
+                
+                //---------------- Archivo Creado -----------//
+                if (CuadroDialogo.ShowDialog() == DialogResult.OK)
+                {
+                    ExcelApp.ActiveWorkbook.SaveCopyAs(CuadroDialogo.FileName);
+                    ExcelApp.ActiveWorkbook.Saved = true;
+                    CuadroDialogo.Dispose();
+                    CuadroDialogo = null;
+                    ExcelApp.Quit();
+                    MessageBox.Show("el archivo .xlsx fue creado exitosamente ");
+                }
+                else
+                {
+                    MessageBox.Show("No se pudo guardar Datos ... ");
+                }
+            }
+        }
+    }
+}
